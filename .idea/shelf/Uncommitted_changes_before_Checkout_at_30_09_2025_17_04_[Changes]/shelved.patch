@@ -1,0 +1,396 @@
+Index: src/models.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>class Product:\r\n    \"\"\"Класс для представления товара.\"\"\"\r\n\r\n    def __init__(self, name, description, price, quantity):\r\n        \"\"\"\r\n        Инициализация объекта товара.\r\n\r\n        Args:\r\n            name: Название товара\r\n            description: Описание товара\r\n            price: Цена товара\r\n            quantity: Количество товара в наличии\r\n        \"\"\"\r\n        self.name = name\r\n        self.description = description\r\n        self.__price = price  # Приватный атрибут\r\n        self.quantity = quantity\r\n\r\n    @classmethod\r\n    def new_product(cls, product_data):\r\n        \"\"\"\r\n        Создает новый продукт из словаря с данными.\r\n\r\n        Args:\r\n            product_data (dict): Словарь с данными продукта\r\n                Должен содержать ключи: name, description, price, quantity\r\n\r\n        Returns:\r\n            Product: Созданный объект продукта\r\n\r\n        Raises:\r\n            ValueError: Если отсутствуют обязательные поля\r\n        \"\"\"\r\n        required_fields = ['name', 'description', 'price', 'quantity']\r\n        for field in required_fields:\r\n            if field not in product_data:\r\n                raise ValueError(f\"Отсутствует обязательное поле: {field}\")\r\n\r\n        return cls(\r\n            name=product_data['name'],\r\n            description=product_data['description'],\r\n            price=product_data['price'],\r\n            quantity=product_data['quantity']\r\n        )\r\n\r\n    @property\r\n    def price(self):\r\n        \"\"\"Геттер для цены.\"\"\"\r\n        return self.__price\r\n\r\n    @price.setter\r\n    def price(self, new_price):\r\n        \"\"\"\r\n        Сеттер для цены с проверкой.\r\n\r\n        Args:\r\n            new_price: Новая цена товара\r\n\r\n        Raises:\r\n            ValueError: Если цена равна или ниже нуля\r\n        \"\"\"\r\n        if new_price <= 0:\r\n            print(\"Цена не должна быть нулевая или отрицательная\")\r\n        else:\r\n            self.__price = new_price\r\n\r\n    def __str__(self):\r\n        \"\"\"Строковое представление товара.\"\"\"\r\n        return f\"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт.\"\r\n\r\n\r\nclass Category:\r\n    \"\"\"Класс для представления категории товаров.\"\"\"\r\n\r\n    category_count = 0\r\n    product_count = 0\r\n\r\n    def __init__(self, name, description, products=None):\r\n        \"\"\"\r\n        Инициализация объекта категории.\r\n\r\n        Args:\r\n            name: Название категории\r\n            description: Описание категории\r\n            products: Список товаров в категории (по умолчанию пустой список)\r\n        \"\"\"\r\n        self.name = name\r\n        self.description = description\r\n        self.__products = products if products is not None else []\r\n\r\n        # Обновляем счетчики\r\n        Category.category_count += 1\r\n        Category.product_count += len(self.__products)\r\n\r\n    def add_product(self, product):\r\n        \"\"\"\r\n        Добавляет товар в категорию.\r\n\r\n        Args:\r\n            product: Объект класса Product для добавления\r\n\r\n        Raises:\r\n            TypeError: Если переданный объект не является экземпляром класса Product\r\n        \"\"\"\r\n        if not isinstance(product, Product):\r\n            raise TypeError(\"Можно добавлять только объекты класса Product\")\r\n\r\n        self.__products.append(product)\r\n        Category.product_count += 1\r\n\r\n    @property\r\n    def products(self):\r\n        \"\"\"Геттер для списка товаров в формате строк.\"\"\"\r\n        return \"\\n\".join(str(product) for product in self.__products)\r\n\r\n    def get_products_list(self):\r\n        \"\"\"\r\n        Возвращает внутренний список товаров (для внутреннего использования).\r\n\r\n        Returns:\r\n            list: Список объектов Product\r\n        \"\"\"\r\n        return self.__products\r\n\r\n    def __len__(self):\r\n        \"\"\"Возвращает количество товаров в категории.\"\"\"\r\n        return len(self.__products)\r\n\r\n# if __name__ == \"__main__\":\r\n#     product1 = Product(\"Samsung Galaxy S23 Ultra\", \"256GB, Серый цвет, 200MP камера\", 180000.0, 5)\r\n#     product2 = Product(\"Iphone 15\", \"512GB, Gray space\", 210000.0, 8)\r\n#     product3 = Product(\"Xiaomi Redmi Note 11\", \"1024GB, Синий\", 31000.0, 14)\r\n#\r\n#     print(product1.name)\r\n#     print(product1.description)\r\n#     print(product1.price)\r\n#     print(product1.quantity)\r\n#\r\n#     print(product2.name)\r\n#     print(product2.description)\r\n#     print(product2.price)\r\n#     print(product2.quantity)\r\n#\r\n#     print(product3.name)\r\n#     print(product3.description)\r\n#     print(product3.price)\r\n#     print(product3.quantity)\r\n#\r\n#     category1 = Category(\"Смартфоны\",\r\n#                          \"Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни\",\r\n#                          [product1, product2, product3])\r\n#\r\n#     print(category1.name == \"Смартфоны\")\r\n#     print(category1.description)\r\n#     print(len(category1.products))\r\n#     print(category1.category_count)\r\n#     print(category1.product_count)\r\n#\r\n#     product4 = Product(\"55\\\" QLED 4K\", \"Фоновая подсветка\", 123000.0, 7)\r\n#     category2 = Category(\"Телевизоры\",\r\n#                          \"Современный телевизор, который позволяет наслаждаться просмотром, станет вашим другом и помощником\",\r\n#                          [product4])\r\n#\r\n#     print(category2.name)\r\n#     print(category2.description)\r\n#     print(len(category2.products))\r\n#     print(category2.products)\r\n#\r\n#     print(Category.category_count)\r\n#     print(Category.product_count)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/models.py b/src/models.py
+--- a/src/models.py	(revision 10c333c73d8e7dd88141273e7e44c95a419aa68f)
++++ b/src/models.py	(date 1759230246448)
+@@ -2,35 +2,13 @@
+     """Класс для представления товара."""
+ 
+     def __init__(self, name, description, price, quantity):
+-        """
+-        Инициализация объекта товара.
+-
+-        Args:
+-            name: Название товара
+-            description: Описание товара
+-            price: Цена товара
+-            quantity: Количество товара в наличии
+-        """
+         self.name = name
+         self.description = description
+-        self.__price = price  # Приватный атрибут
++        self.__price = price
+         self.quantity = quantity
+ 
+     @classmethod
+     def new_product(cls, product_data):
+-        """
+-        Создает новый продукт из словаря с данными.
+-
+-        Args:
+-            product_data (dict): Словарь с данными продукта
+-                Должен содержать ключи: name, description, price, quantity
+-
+-        Returns:
+-            Product: Созданный объект продукта
+-
+-        Raises:
+-            ValueError: Если отсутствуют обязательные поля
+-        """
+         required_fields = ['name', 'description', 'price', 'quantity']
+         for field in required_fields:
+             if field not in product_data:
+@@ -45,27 +23,16 @@
+ 
+     @property
+     def price(self):
+-        """Геттер для цены."""
+         return self.__price
+ 
+     @price.setter
+     def price(self, new_price):
+-        """
+-        Сеттер для цены с проверкой.
+-
+-        Args:
+-            new_price: Новая цена товара
+-
+-        Raises:
+-            ValueError: Если цена равна или ниже нуля
+-        """
+         if new_price <= 0:
+             print("Цена не должна быть нулевая или отрицательная")
+         else:
+             self.__price = new_price
+ 
+     def __str__(self):
+-        """Строковое представление товара."""
+         return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+ 
+ 
+@@ -76,32 +43,14 @@
+     product_count = 0
+ 
+     def __init__(self, name, description, products=None):
+-        """
+-        Инициализация объекта категории.
+-
+-        Args:
+-            name: Название категории
+-            description: Описание категории
+-            products: Список товаров в категории (по умолчанию пустой список)
+-        """
+         self.name = name
+         self.description = description
+         self.__products = products if products is not None else []
+ 
+-        # Обновляем счетчики
+         Category.category_count += 1
+         Category.product_count += len(self.__products)
+ 
+     def add_product(self, product):
+-        """
+-        Добавляет товар в категорию.
+-
+-        Args:
+-            product: Объект класса Product для добавления
+-
+-        Raises:
+-            TypeError: Если переданный объект не является экземпляром класса Product
+-        """
+         if not isinstance(product, Product):
+             raise TypeError("Можно добавлять только объекты класса Product")
+ 
+@@ -110,20 +59,9 @@
+ 
+     @property
+     def products(self):
+-        """Геттер для списка товаров в формате строк."""
+         return "\n".join(str(product) for product in self.__products)
+ 
+-    def get_products_list(self):
+-        """
+-        Возвращает внутренний список товаров (для внутреннего использования).
+-
+-        Returns:
+-            list: Список объектов Product
+-        """
+-        return self.__products
+-
+     def __len__(self):
+-        """Возвращает количество товаров в категории."""
+         return len(self.__products)
+ 
+ # if __name__ == "__main__":
+Index: tests/test_models.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import pytest\r\nfrom src.models import Product, Category\r\n\r\n\r\nclass TestProduct:\r\n    \"\"\"Тесты для класса Product\"\"\"\r\n\r\n    def test_product_initialization(self):\r\n        \"\"\"Тест корректности инициализации объекта Product\"\"\"\r\n        product = Product(\r\n            name=\"Телефон\",\r\n            description=\"Смартфон последней модели\",\r\n            price=999.99,\r\n            quantity=10\r\n        )\r\n\r\n        assert product.name == \"Телефон\"\r\n        assert product.description == \"Смартфон последней модели\"\r\n        assert product.price == 999.99\r\n        assert product.quantity == 10\r\n\r\n    def test_product_attributes_types(self):\r\n        \"\"\"Тест типов атрибутов Product\"\"\"\r\n        product = Product(\"Ноутбук\", \"Игровой ноутбук\", 1500.0, 5)\r\n\r\n        assert isinstance(product.name, str)\r\n        assert isinstance(product.description, str)\r\n        assert isinstance(product.price, float)\r\n        assert isinstance(product.quantity, int)\r\n\r\n\r\nclass TestCategory:\r\n    \"\"\"Тесты для класса Category\"\"\"\r\n\r\n    def setup_method(self):\r\n        \"\"\"Сброс счетчиков перед каждым тестом\"\"\"\r\n        Category.category_count = 0\r\n        Category.product_count = 0\r\n\r\n    def test_category_initialization(self):\r\n        \"\"\"Тест корректности инициализации объекта Category\"\"\"\r\n        # Создаем товары для категории\r\n        product1 = Product(\"Товар1\", \"Описание1\", 100.0, 5)\r\n        product2 = Product(\"Товар2\", \"Описание2\", 200.0, 3)\r\n\r\n        category = Category(\r\n            name=\"Электроника\",\r\n            description=\"Электронные товары\",\r\n            products=[product1, product2]\r\n        )\r\n\r\n        assert category.name == \"Электроника\"\r\n        assert category.description == \"Электронные товары\"\r\n        assert len(category.products) == 2\r\n        assert isinstance(category.products[0], Product)\r\n        assert isinstance(category.products[1], Product)\r\n\r\n    def test_category_count_increment(self):\r\n        \"\"\"Тест подсчета количества категорий\"\"\"\r\n        # Проверяем начальное значение\r\n        assert Category.category_count == 0\r\n\r\n        # Создаем первую категорию\r\n        Category(\"Кат1\", \"Описание1\", [])\r\n        assert Category.category_count == 1\r\n\r\n        # Создаем вторую категорию\r\n        Category(\"Кат2\", \"Описание2\", [])\r\n        assert Category.category_count == 2\r\n\r\n        # Создаем третью категорию\r\n        Category(\"Кат3\", \"Описание3\", [])\r\n        assert Category.category_count == 3\r\n\r\n    def test_product_count_increment(self):\r\n        \"\"\"Тест подсчета количества товаров\"\"\"\r\n        # Проверяем начальное значение\r\n        assert Category.product_count == 0\r\n\r\n        # Создаем товары\r\n        product1 = Product(\"Т1\", \"Оп1\", 100.0, 1)\r\n        product2 = Product(\"Т2\", \"Оп2\", 200.0, 2)\r\n        product3 = Product(\"Т3\", \"Оп3\", 300.0, 3)\r\n\r\n        # Создаем категорию с 2 товарами\r\n        Category(\"Кат1\", \"Описание1\", [product1, product2])\r\n        assert Category.product_count == 2\r\n\r\n        # Создаем категорию с 1 товаром\r\n        Category(\"Кат2\", \"Описание2\", [product3])\r\n        assert Category.product_count == 3\r\n\r\n    def test_category_with_empty_products(self):\r\n        \"\"\"Тест категории с пустым списком товаров\"\"\"\r\n        category = Category(\"Пустая\", \"Категория без товаров\", [])\r\n\r\n        assert category.name == \"Пустая\"\r\n        assert category.description == \"Категория без товаров\"\r\n        assert category.products == []\r\n        assert Category.category_count == 1\r\n        assert Category.product_count == 0\r\n\r\n    def test_category_with_single_product(self):\r\n        \"\"\"Тест категории с одним товаром\"\"\"\r\n        product = Product(\"Единственный\", \"Товар\", 50.0, 1)\r\n        category = Category(\"Одиночная\", \"Один товар\", [product])\r\n\r\n        assert len(category.products) == 1\r\n        assert category.products[0].name == \"Единственный\"\r\n        assert Category.product_count == 1\r\n\r\n    @pytest.fixture\r\n    def sample_products(self):\r\n        \"\"\"Фикстура с примером товаров\"\"\"\r\n        return [\r\n            Product(\"Продукт A\", \"Описание A\", 100.0, 5),\r\n            Product(\"Продукт B\", \"Описание B\", 200.0, 3),\r\n            Product(\"Продукт C\", \"Описание C\", 300.0, 7)\r\n        ]\r\n\r\n    def test_category_with_fixture_products(self, sample_products):\r\n        \"\"\"Тест категории с товарами из фикстуры\"\"\"\r\n        category = Category(\"Тестовая\", \"Категория с фикстурой\", sample_products)\r\n\r\n        assert len(category.products) == 3\r\n        assert category.products[0].name == \"Продукт A\"\r\n        assert category.products[1].price == 200.0\r\n        assert category.products[2].quantity == 7\r\n        assert Category.product_count == 3\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/tests/test_models.py b/tests/test_models.py
+--- a/tests/test_models.py	(revision 10c333c73d8e7dd88141273e7e44c95a419aa68f)
++++ b/tests/test_models.py	(date 1759230246518)
+@@ -3,127 +3,83 @@
+ 
+ 
+ class TestProduct:
+-    """Тесты для класса Product"""
++    """Тесты для класса Product."""
+ 
+-    def test_product_initialization(self):
+-        """Тест корректности инициализации объекта Product"""
+-        product = Product(
+-            name="Телефон",
+-            description="Смартфон последней модели",
+-            price=999.99,
+-            quantity=10
+-        )
+-
++    def test_product_creation(self):
++        """Тест создания продукта."""
++        product = Product("Телефон", "Смартфон", 999.99, 10)
+         assert product.name == "Телефон"
+-        assert product.description == "Смартфон последней модели"
+         assert product.price == 999.99
+         assert product.quantity == 10
+ 
+-    def test_product_attributes_types(self):
+-        """Тест типов атрибутов Product"""
+-        product = Product("Ноутбук", "Игровой ноутбук", 1500.0, 5)
++    def test_new_product_class_method(self):
++        """Тест создания продукта через класс-метод."""
++        product_data = {
++            'name': 'Телефон',
++            'description': 'Смартфон',
++            'price': 500.0,
++            'quantity': 8
++        }
++        product = Product.new_product(product_data)
++        assert isinstance(product, Product)
++        assert product.name == 'Телефон'
++
++    def test_price_validation(self):
++        """Тест валидации цены."""
++        product = Product("Товар", "Описание", 100.0, 5)
+ 
+-        assert isinstance(product.name, str)
+-        assert isinstance(product.description, str)
+-        assert isinstance(product.price, float)
+-        assert isinstance(product.quantity, int)
++        # Попытка установить невалидную цену
++        product.price = -50
++        assert product.price == 100.0  # Цена не изменилась
++
++        # Установка валидной цены
++        product.price = 150.0
++        assert product.price == 150.0
++
++    def test_str_representation(self):
++        """Тест строкового представления."""
++        product = Product("Телефон", "Смартфон", 999.99, 10)
++        assert str(product) == "Телефон, 999.99 руб. Остаток: 10 шт."
+ 
+ 
+ class TestCategory:
+-    """Тесты для класса Category"""
++    """Тесты для класса Category."""
+ 
+     def setup_method(self):
+-        """Сброс счетчиков перед каждым тестом"""
++        """Сброс счетчиков перед каждым тестом."""
+         Category.category_count = 0
+         Category.product_count = 0
+ 
+-    def test_category_initialization(self):
+-        """Тест корректности инициализации объекта Category"""
+-        # Создаем товары для категории
+-        product1 = Product("Товар1", "Описание1", 100.0, 5)
+-        product2 = Product("Товар2", "Описание2", 200.0, 3)
+-
+-        category = Category(
+-            name="Электроника",
+-            description="Электронные товары",
+-            products=[product1, product2]
+-        )
++    def test_category_creation(self):
++        """Тест создания категории."""
++        product = Product("Товар", "Описание", 100.0, 5)
++        category = Category("Электроника", "Техника", [product])
+ 
+         assert category.name == "Электроника"
+-        assert category.description == "Электронные товары"
+-        assert len(category.products) == 2
+-        assert isinstance(category.products[0], Product)
+-        assert isinstance(category.products[1], Product)
+-
+-    def test_category_count_increment(self):
+-        """Тест подсчета количества категорий"""
+-        # Проверяем начальное значение
+-        assert Category.category_count == 0
++        assert "Товар, 100.0 руб. Остаток: 5 шт." in category.products
+ 
+-        # Создаем первую категорию
+-        Category("Кат1", "Описание1", [])
+-        assert Category.category_count == 1
++    def test_add_product(self):
++        """Тест добавления товара в категорию."""
++        category = Category("Категория", "Описание")
++        product = Product("Товар", "Описание", 150.0, 3)
+ 
+-        # Создаем вторую категорию
+-        Category("Кат2", "Описание2", [])
+-        assert Category.category_count == 2
++        category.add_product(product)
++        assert len(category) == 1
++        assert "Товар, 150.0 руб. Остаток: 3 шт." in category.products
+ 
+-        # Создаем третью категорию
+-        Category("Кат3", "Описание3", [])
+-        assert Category.category_count == 3
+-
+-    def test_product_count_increment(self):
+-        """Тест подсчета количества товаров"""
+-        # Проверяем начальное значение
+-        assert Category.product_count == 0
+-
+-        # Создаем товары
++    def test_counters(self):
++        """Тест счетчиков категорий и товаров."""
+         product1 = Product("Т1", "Оп1", 100.0, 1)
+         product2 = Product("Т2", "Оп2", 200.0, 2)
+-        product3 = Product("Т3", "Оп3", 300.0, 3)
+ 
+-        # Создаем категорию с 2 товарами
+-        Category("Кат1", "Описание1", [product1, product2])
++        category1 = Category("Кат1", "Описание1", [product1])
++        category2 = Category("Кат2", "Описание2", [product2])
++
++        assert Category.category_count == 2
+         assert Category.product_count == 2
+ 
+-        # Создаем категорию с 1 товаром
+-        Category("Кат2", "Описание2", [product3])
+-        assert Category.product_count == 3
+-
+-    def test_category_with_empty_products(self):
+-        """Тест категории с пустым списком товаров"""
+-        category = Category("Пустая", "Категория без товаров", [])
+-
+-        assert category.name == "Пустая"
+-        assert category.description == "Категория без товаров"
+-        assert category.products == []
+-        assert Category.category_count == 1
+-        assert Category.product_count == 0
+-
+-    def test_category_with_single_product(self):
+-        """Тест категории с одним товаром"""
+-        product = Product("Единственный", "Товар", 50.0, 1)
+-        category = Category("Одиночная", "Один товар", [product])
+-
+-        assert len(category.products) == 1
+-        assert category.products[0].name == "Единственный"
+-        assert Category.product_count == 1
+-
+-    @pytest.fixture
+-    def sample_products(self):
+-        """Фикстура с примером товаров"""
+-        return [
+-            Product("Продукт A", "Описание A", 100.0, 5),
+-            Product("Продукт B", "Описание B", 200.0, 3),
+-            Product("Продукт C", "Описание C", 300.0, 7)
+-        ]
+-
+-    def test_category_with_fixture_products(self, sample_products):
+-        """Тест категории с товарами из фикстуры"""
+-        category = Category("Тестовая", "Категория с фикстурой", sample_products)
+-
+-        assert len(category.products) == 3
+-        assert category.products[0].name == "Продукт A"
+-        assert category.products[1].price == 200.0
+-        assert category.products[2].quantity == 7
+-        assert Category.product_count == 3
++    def test_private_products_access(self):
++        """Тест приватности атрибута продуктов."""
++        category = Category("Категория", "Описание")
++        with pytest.raises(AttributeError):
++            _ = category.__products
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"AutoImportSettings\">\r\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\r\n  </component>\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"9c192ce6-0868-4aa9-9caf-c23cad346c15\" name=\"Changes\" comment=\"\">\r\n      <change afterPath=\"$PROJECT_DIR$/README.md\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/src/models.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/src/models.py\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Python Script\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"feature/tasks_2\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitHubPullRequestSearchHistory\"><![CDATA[{\r\n  \"lastFilter\": {\r\n    \"state\": \"OPEN\",\r\n    \"assignee\": \"rahimzhanov\"\r\n  }\r\n}]]></component>\r\n  <component name=\"GithubPullRequestsUISettings\"><![CDATA[{\r\n  \"selectedUrlAndAccountId\": {\r\n    \"url\": \"https://github.com/rahimzhanov/14.1_OOP.git\",\r\n    \"accountId\": \"36c6f44d-7cf4-46e6-95ac-aa7f70b5ea1f\"\r\n  }\r\n}]]></component>\r\n  <component name=\"ProjectColorInfo\"><![CDATA[{\r\n  \"associatedIndex\": 4\r\n}]]></component>\r\n  <component name=\"ProjectId\" id=\"33N8v3bdXCPJDVTMbO0t2tajspf\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\"><![CDATA[{\r\n  \"keyToString\": {\r\n    \"ModuleVcsDetector.initialDetectionPerformed\": \"true\",\r\n    \"Python.14.1_main.executor\": \"Run\",\r\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\r\n    \"git-widget-placeholder\": \"#1 on feature/tasks\"\r\n  }\r\n}]]></component>\r\n  <component name=\"SharedIndexes\">\r\n    <attachedChunks>\r\n      <set>\r\n        <option value=\"bundled-python-sdk-dfff61a61320-9cdd278e9d02-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-251.25410.159\" />\r\n      </set>\r\n    </attachedChunks>\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"9c192ce6-0868-4aa9-9caf-c23cad346c15\" name=\"Changes\" comment=\"\" />\r\n      <created>1759146399152</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1759146399152</updated>\r\n    </task>\r\n    <servers />\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 10c333c73d8e7dd88141273e7e44c95a419aa68f)
++++ b/.idea/workspace.xml	(date 1759230255816)
+@@ -4,11 +4,7 @@
+     <option name="autoReloadType" value="SELECTIVE" />
+   </component>
+   <component name="ChangeListManager">
+-    <list default="true" id="9c192ce6-0868-4aa9-9caf-c23cad346c15" name="Changes" comment="">
+-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/src/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models.py" afterDir="false" />
+-    </list>
++    <list default="true" id="9c192ce6-0868-4aa9-9caf-c23cad346c15" name="Changes" comment="" />
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+@@ -24,26 +20,26 @@
+   <component name="Git.Settings">
+     <option name="RECENT_BRANCH_BY_REPOSITORY">
+       <map>
+-        <entry key="$PROJECT_DIR$" value="feature/tasks_2" />
++        <entry key="$PROJECT_DIR$" value="feature/tasks" />
+       </map>
+     </option>
+     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+   </component>
+-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+-  "lastFilter": {
+-    "state": "OPEN",
+-    "assignee": "rahimzhanov"
++  <component name="GitHubPullRequestSearchHistory">{
++  &quot;lastFilter&quot;: {
++    &quot;state&quot;: &quot;OPEN&quot;,
++    &quot;assignee&quot;: &quot;rahimzhanov&quot;
+   }
+-}]]></component>
+-  <component name="GithubPullRequestsUISettings"><![CDATA[{
+-  "selectedUrlAndAccountId": {
+-    "url": "https://github.com/rahimzhanov/14.1_OOP.git",
+-    "accountId": "36c6f44d-7cf4-46e6-95ac-aa7f70b5ea1f"
++}</component>
++  <component name="GithubPullRequestsUISettings">{
++  &quot;selectedUrlAndAccountId&quot;: {
++    &quot;url&quot;: &quot;https://github.com/rahimzhanov/14.1_OOP.git&quot;,
++    &quot;accountId&quot;: &quot;36c6f44d-7cf4-46e6-95ac-aa7f70b5ea1f&quot;
+   }
+-}]]></component>
+-  <component name="ProjectColorInfo"><![CDATA[{
+-  "associatedIndex": 4
+-}]]></component>
++}</component>
++  <component name="ProjectColorInfo">{
++  &quot;associatedIndex&quot;: 4
++}</component>
+   <component name="ProjectId" id="33N8v3bdXCPJDVTMbO0t2tajspf" />
+   <component name="ProjectViewState">
+     <option name="hideEmptyMiddlePackages" value="true" />
+@@ -54,7 +50,7 @@
+     "ModuleVcsDetector.initialDetectionPerformed": "true",
+     "Python.14.1_main.executor": "Run",
+     "RunOnceActivity.ShowReadmeOnStart": "true",
+-    "git-widget-placeholder": "#1 on feature/tasks"
++    "git-widget-placeholder": "feature/tasks__2"
+   }
+ }]]></component>
+   <component name="SharedIndexes">
