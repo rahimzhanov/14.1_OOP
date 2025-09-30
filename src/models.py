@@ -32,9 +32,6 @@ class Product:
         else:
             self.__price = new_price
 
-    def __str__(self):
-        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
-
 
 class Category:
     """Класс для представления категории товаров."""
@@ -59,7 +56,12 @@ class Category:
 
     @property
     def products(self):
-        return "\n".join(str(product) for product in self.__products)
+        """Геттер для вывода списка товаров в требуемом формате."""
+        products_list = []
+        for product in self.__products:
+            product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
+            products_list.append(product_info)
+        return "\n".join(products_list)
 
     def __len__(self):
         return len(self.__products)

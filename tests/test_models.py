@@ -83,3 +83,36 @@ class TestCategory:
         category = Category("Категория", "Описание")
         with pytest.raises(AttributeError):
             _ = category.__products
+
+
+def test_category_products_getter():
+    """Тест геттера products в классе Category."""
+    product1 = Product("Телефон", "Смартфон", 999.99, 10)
+    product2 = Product("Ноутбук", "Игровой", 1500.0, 5)
+
+    category = Category("Электроника", "Техника", [product1, product2])
+
+    products_output = category.products
+
+    # Проверяем точный формат вывода
+    expected_line1 = "Телефон, 999.99 руб. Остаток: 10 шт."
+    expected_line2 = "Ноутбук, 1500.0 руб. Остаток: 5 шт."
+
+    assert expected_line1 in products_output
+    assert expected_line2 in products_output
+
+
+def test_category_products_getter_empty():
+    """Тест геттера products для пустой категории."""
+    category = Category("Пустая", "Категория")
+
+    assert category.products == ""
+
+
+def test_category_products_getter_single_product():
+    """Тест геттера products для одного товара."""
+    product = Product("Мышь", "Компьютерная", 25.5, 20)
+    category = Category("Аксессуары", "Периферия", [product])
+
+    expected = "Мышь, 25.5 руб. Остаток: 20 шт."
+    assert category.products == expected
