@@ -1,15 +1,7 @@
 class Product:
-    """
-    Класс для представления товара.
+    """Класс для представления товара."""
 
-    Атрибуты:
-        name (str): Название товара
-        description (str): Описание товара
-        price (float): Цена товара
-        quantity (int): Количество товара в наличии
-    """
-
-    def __init__(self, name: str, description: str, price: float, quantity: int):
+    def __init__(self, name, description, price, quantity):
         """
         Инициализация объекта товара.
 
@@ -21,47 +13,118 @@ class Product:
         """
         self.name = name
         self.description = description
-        self.price = price
+        self.__price = price  # Приватный атрибут
         self.quantity = quantity
+
+    @classmethod
+    def new_product(cls, product_data):
+        """
+        Создает новый продукт из словаря с данными.
+
+        Args:
+            product_data (dict): Словарь с данными продукта
+                Должен содержать ключи: name, description, price, quantity
+
+        Returns:
+            Product: Созданный объект продукта
+
+        Raises:
+            ValueError: Если отсутствуют обязательные поля
+        """
+        required_fields = ['name', 'description', 'price', 'quantity']
+        for field in required_fields:
+            if field not in product_data:
+                raise ValueError(f"Отсутствует обязательное поле: {field}")
+
+        return cls(
+            name=product_data['name'],
+            description=product_data['description'],
+            price=product_data['price'],
+            quantity=product_data['quantity']
+        )
+
+    @property
+    def price(self):
+        """Геттер для цены."""
+        return self.__price
+
+    @price.setter
+    def price(self, new_price):
+        """
+        Сеттер для цены с проверкой.
+
+        Args:
+            new_price: Новая цена товара
+
+        Raises:
+            ValueError: Если цена равна или ниже нуля
+        """
+        if new_price <= 0:
+            print("Цена не должна быть нулевая или отрицательная")
+        else:
+            self.__price = new_price
+
+    def __str__(self):
+        """Строковое представление товара."""
+        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
 
 
 class Category:
-    """
-    Класс для представления категории товаров.
+    """Класс для представления категории товаров."""
 
-    Атрибуты класса:
-        category_count (int): Общее количество категорий
-        product_count (int): Общее количество товаров
-
-    Атрибуты экземпляра:
-        name (str): Название категории
-        description (str): Описание категории
-        products (list): Список товаров в категории
-    """
-
-    # Атрибуты класса
     category_count = 0
     product_count = 0
 
-    def __init__(self, name: str, description: str, products: list):
+    def __init__(self, name, description, products=None):
         """
         Инициализация объекта категории.
 
         Args:
             name: Название категории
             description: Описание категории
-            products: Список товаров в категории
+            products: Список товаров в категории (по умолчанию пустой список)
         """
         self.name = name
         self.description = description
-        self.products = products
+        self.__products = products if products is not None else []
 
-        # Увеличиваем счетчик категорий
+        # Обновляем счетчики
         Category.category_count += 1
+        Category.product_count += len(self.__products)
 
-        # Увеличиваем счетчик товаров на количество товаров в категории
-        Category.product_count += len(products)
+    def add_product(self, product):
+        """
+        Добавляет товар в категорию.
 
+        Args:
+            product: Объект класса Product для добавления
+
+        Raises:
+            TypeError: Если переданный объект не является экземпляром класса Product
+        """
+        if not isinstance(product, Product):
+            raise TypeError("Можно добавлять только объекты класса Product")
+
+        self.__products.append(product)
+        Category.product_count += 1
+
+    @property
+    def products(self):
+        """Геттер для списка товаров в формате строк."""
+        return "\n".join(str(product) for product in self.__products)
+
+    def get_products_list(self):
+        """
+        Возвращает внутренний список товаров (для внутреннего использования).
+
+        Returns:
+            list: Список объектов Product
+        """
+        return self.__products
+
+    def __len__(self):
+        """Возвращает количество товаров в категории."""
+        return len(self.__products)
 
 # if __name__ == "__main__":
 #     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
