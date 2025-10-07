@@ -24,6 +24,16 @@ class TestProduct:
         assert isinstance(product, Product)
         assert product.name == 'Телефон'
 
+    def test_new_product_missing_fields(self):
+        """Тест создания продукта с отсутствующими полями."""
+        incomplete_data = {
+            'name': 'Телефон',
+            'description': 'Смартфон'
+            # отсутствуют price и quantity
+        }
+        with pytest.raises(ValueError):
+            Product.new_product(incomplete_data)
+
     def test_price_validation(self):
         """Тест валидации цены."""
         product = Product("Товар", "Описание", 100.0, 5)
@@ -36,10 +46,42 @@ class TestProduct:
         product.price = 150.0
         assert product.price == 150.0
 
+    def test_price_validation_zero(self):
+        """Тест валидации нулевой цены."""
+        product = Product("Товар", "Описание", 100.0, 5)
+        product.price = 0
+        assert product.price == 100.0  # Цена не должна измениться
+
     def test_str_representation(self):
         """Тест строкового представления."""
         product = Product("Телефон", "Смартфон", 999.99, 10)
         assert str(product) == "Телефон, 999.99 руб. Остаток: 10 шт."
+
+    def test_add_products(self):
+        """Тест сложения продуктов."""
+        product1 = Product("Товар1", "Описание1", 100.0, 2)  # 100 * 2 = 200
+        product2 = Product("Товар2", "Описание2", 50.0, 3)  # 50 * 3 = 150
+
+        total = product1 + product2
+        assert total == 350.0  # 200 + 150
+
+    def test_add_product_with_invalid_type(self):
+        """Тест сложения продукта с неверным типом."""
+        product = Product("Товар", "Описание", 100.0, 2)
+
+        with pytest.raises(TypeError):
+            product + "не продукт"
+
+        with pytest.raises(TypeError):
+            product + 123
+
+    def test_private_price_access(self):
+        """Тест приватности атрибута цены."""
+        product = Product("Товар", "Описание", 100.0, 5)
+
+        # Прямой доступ к __price должен вызывать ошибку
+        with pytest.raises(AttributeError):
+            _ = product.__price
 
 
 class TestCategory:
@@ -56,7 +98,15 @@ class TestCategory:
         category = Category("Электроника", "Техника", [product])
 
         assert category.name == "Электроника"
-        assert "Товар, 100.0 руб. Остаток: 5 шт." in category.products
+        assert "Товар, 100.0 руб. Остаток: 5 шт." in category.get_products
+
+    def test_category_creation_empty(self):
+        """Тест создания пустой категории."""
+        category = Category("Пустая", "Категория")
+
+        assert category.name == "Пустая"
+        assert len(category) == 0
+        assert category.get_products == ""
 
     def test_add_product(self):
         """Тест добавления товара в категорию."""
@@ -65,7 +115,17 @@ class TestCategory:
 
         category.add_product(product)
         assert len(category) == 1
-        assert "Товар, 150.0 руб. Остаток: 3 шт." in category.products
+        assert "Товар, 150.0 руб. Остаток: 3 шт." in category.get_products
+
+    def test_add_invalid_product(self):
+        """Тест добавления невалидного объекта в категорию."""
+        category = Category("Категория", "Описание")
+
+        with pytest.raises(TypeError):
+            category.add_product("не продукт")
+
+        with pytest.raises(TypeError):
+            category.add_product(123)
 
     def test_counters(self):
         """Тест счетчиков категорий и товаров."""
@@ -78,11 +138,36 @@ class TestCategory:
         assert Category.category_count == 2
         assert Category.product_count == 2
 
+    def test_counters_with_add_product(self):
+        """Тест счетчиков при добавлении товаров после создания."""
+        category = Category("Категория", "Описание")
+        initial_count = Category.product_count
+
+        product = Product("Товар", "Описание", 100.0, 1)
+        category.add_product(product)
+
+        assert Category.product_count == initial_count + 1
+
     def test_private_products_access(self):
         """Тест приватности атрибута продуктов."""
         category = Category("Категория", "Описание")
         with pytest.raises(AttributeError):
             _ = category.__products
+
+    def test_len_method(self):
+        """Тест метода __len__."""
+        category = Category("Категория", "Описание")
+        assert len(category) == 0
+
+        product = Product("Товар", "Описание", 100.0, 1)
+        category.add_product(product)
+        assert len(category) == 1
+
+    def test_str_representation(self):
+        """Тест строкового представления категории."""
+        category = Category("Электроника", "Техника")
+        expected = f"Название категории: Электроника, количество продуктов: {Category.product_count}"
+        assert str(category) == expected
 
 
 def test_category_products_getter():
@@ -92,7 +177,7 @@ def test_category_products_getter():
 
     category = Category("Электроника", "Техника", [product1, product2])
 
-    products_output = category.products
+    products_output = category.get_products
 
     # Проверяем точный формат вывода
     expected_line1 = "Телефон, 999.99 руб. Остаток: 10 шт."
@@ -106,7 +191,7 @@ def test_category_products_getter_empty():
     """Тест геттера products для пустой категории."""
     category = Category("Пустая", "Категория")
 
-    assert category.products == ""
+    assert category.get_products == ""
 
 
 def test_category_products_getter_single_product():
@@ -115,4 +200,28 @@ def test_category_products_getter_single_product():
     category = Category("Аксессуары", "Периферия", [product])
 
     expected = "Мышь, 25.5 руб. Остаток: 20 шт."
-    assert category.products == expected
+    assert category.get_products == expected
+
+
+def test_product_addition_multiple():
+    """Тест сложения нескольких продуктов."""
+    product1 = Product("Товар1", "Описание1", 100.0, 2)  # 200
+    product2 = Product("Товар2", "Описание2", 50.0, 4)  # 200
+    product3 = Product("Товар3", "Описание3", 25.0, 8)  # 200
+
+    # Складываем попарно, так как __add__ возвращает float
+    total1 = product1 + product2  # 200 + 200 = 400
+    total = total1 + (product3.price * product3.quantity)  # 400 + 200 = 600
+    assert total == 600.0
+
+def test_category_str_with_products():
+    """Тест строкового представления категории с товарами."""
+    product = Product("Телефон", "Смартфон", 1000.0, 5)
+    category = Category("Электроника", "Техника", [product])
+
+    # Сбрасываем счетчики для предсказуемого теста
+    Category.category_count = 1
+    Category.product_count = 1
+
+    expected = "Название категории: Электроника, количество продуктов: 1"
+    assert str(category) == expected

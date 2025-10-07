@@ -7,6 +7,14 @@ class Product:
         self.__price = price
         self.quantity = quantity
 
+    def __str__(self):
+        return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other):
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты Product")
+        return (self.price * self.quantity) + (other.price * other.quantity)
+
     @classmethod
     def new_product(cls, product_data):
         required_fields = ['name', 'description', 'price', 'quantity']
@@ -47,6 +55,9 @@ class Category:
         Category.category_count += 1
         Category.product_count += len(self.__products)
 
+    def __str__(self):
+        return f"Название категории: {self.name}, количество продуктов: {Category.product_count}"
+
     def add_product(self, product):
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только объекты класса Product")
@@ -55,17 +66,39 @@ class Category:
         Category.product_count += 1
 
     @property
-    def products(self):
+    def get_products(self):
         """Геттер для вывода списка товаров в требуемом формате."""
         products_list = []
         for product in self.__products:
-            product_info = f"{product.name}, {product.price} руб. Остаток: {product.quantity} шт."
-            products_list.append(product_info)
+            products_list.append(str(product))
         return "\n".join(products_list)
 
     def __len__(self):
         return len(self.__products)
 
+
+if __name__ == '__main__':
+    product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
+    product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
+    product3 = Product("Xiaomi Redmi Note 11", "1024GB, Синий", 31000.0, 14)
+
+    print(str(product1))
+    print(str(product2))
+    print(str(product3))
+
+    category1 = Category(
+        "Смартфоны",
+        "Смартфоны, как средство не только коммуникации, но и получения дополнительных функций для удобства жизни",
+        [product1, product2, product3]
+    )
+
+    print(str(category1))
+
+    print(category1.get_products)
+
+    print(product1 + product2)
+    print(product1 + product3)
+    print(product2 + product3)
 # if __name__ == "__main__":
 #     product1 = Product("Samsung Galaxy S23 Ultra", "256GB, Серый цвет, 200MP камера", 180000.0, 5)
 #     product2 = Product("Iphone 15", "512GB, Gray space", 210000.0, 8)
@@ -92,7 +125,7 @@ class Category:
 #
 #     print(category1.name == "Смартфоны")
 #     print(category1.description)
-#     print(len(category1.products))
+#     print(len(category1.get_products))
 #     print(category1.category_count)
 #     print(category1.product_count)
 #
@@ -103,7 +136,7 @@ class Category:
 #
 #     print(category2.name)
 #     print(category2.description)
-#     print(len(category2.products))
+#     print(len(category2.get_products))
 #     print(category2.products)
 #
 #     print(Category.category_count)
