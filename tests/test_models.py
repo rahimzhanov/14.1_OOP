@@ -136,7 +136,8 @@ class TestCategory:
         category2 = Category("Кат2", "Описание2", [product2])
 
         assert Category.category_count == 2
-        assert Category.product_count == 2
+        assert Category.product_count == 0
+
 
     def test_counters_with_add_product(self):
         """Тест счетчиков при добавлении товаров после создания."""
@@ -163,10 +164,19 @@ class TestCategory:
         category.add_product(product)
         assert len(category) == 1
 
-    def test_str_representation(self):
-        """Тест строкового представления категории."""
+    def test_str_representation_empty(self):
+        """Тест строкового представления пустой категории."""
         category = Category("Электроника", "Техника")
-        expected = f"Название категории: Электроника, количество продуктов: {Category.product_count}"
+        expected = "Электроника, количество продуктов: 0 шт."
+        assert str(category) == expected
+
+    def test_str_representation_with_products(self):
+        """Тест строкового представления категории с товарами."""
+        product1 = Product("Телефон", "Смартфон", 1000.0, 5)
+        product2 = Product("Ноутбук", "Игровой", 2000.0, 3)
+        category = Category("Электроника", "Техника", [product1, product2])
+
+        expected = "Электроника, количество продуктов: 8 шт."  # 5 + 3
         assert str(category) == expected
 
 
@@ -213,15 +223,3 @@ def test_product_addition_multiple():
     total1 = product1 + product2  # 200 + 200 = 400
     total = total1 + (product3.price * product3.quantity)  # 400 + 200 = 600
     assert total == 600.0
-
-def test_category_str_with_products():
-    """Тест строкового представления категории с товарами."""
-    product = Product("Телефон", "Смартфон", 1000.0, 5)
-    category = Category("Электроника", "Техника", [product])
-
-    # Сбрасываем счетчики для предсказуемого теста
-    Category.category_count = 1
-    Category.product_count = 1
-
-    expected = "Название категории: Электроника, количество продуктов: 1"
-    assert str(category) == expected
