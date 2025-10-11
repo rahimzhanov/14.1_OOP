@@ -11,9 +11,11 @@ class Product:
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."
 
     def __add__(self, other):
-        if not isinstance(other, Product):
-            raise TypeError("Можно складывать только объекты Product")
-        return (self.price * self.quantity) + (other.price * other.quantity)
+        if isinstance(other, Product):
+            if type(other) == type(self):
+                return (self.price * self.quantity) + (other.price * other.quantity)
+            raise TypeError("Можно складывать объекты только одного класса")
+        raise TypeError("Можно складывать только объекты Product")
 
     @classmethod
     def new_product(cls, product_data):
@@ -61,9 +63,9 @@ class Category:
 
 
     def add_product(self, product):
+        # Вместо сложной проверки используйте просто isinstance
         if not isinstance(product, Product):
             raise TypeError("Можно добавлять только объекты класса Product")
-
         self.__products.append(product)
         Category.product_count += 1
 
@@ -167,7 +169,7 @@ if __name__ == '__main__':
 
         category_smartphones.add_product(smartphone3)
 
-        print(category_smartphones.products)
+        print(category_smartphones.get_products)
 
         print(Category.product_count)
 

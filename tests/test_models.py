@@ -1,5 +1,5 @@
 import pytest
-from src.models import Product, Category
+from src.models import Product, Category, Smartphone, LawnGrass
 
 
 class TestProduct:
@@ -223,3 +223,250 @@ def test_product_addition_multiple():
     total1 = product1 + product2  # 200 + 200 = 400
     total = total1 + (product3.price * product3.quantity)  # 400 + 200 = 600
     assert total == 600.0
+
+
+class TestProductInheritance:
+    """Тесты для наследования классов Product."""
+
+    def test_smartphone_creation(self):
+        """Тест создания смартфона."""
+        smartphone = Smartphone(
+            "iPhone 15", "Флагманский смартфон", 150000.0, 10,
+            95.5, "15 Pro", 256, "Black"
+        )
+
+        assert smartphone.name == "iPhone 15"
+        assert smartphone.price == 150000.0
+        assert smartphone.quantity == 10
+        assert smartphone.efficiency == 95.5
+        assert smartphone.model == "15 Pro"
+        assert smartphone.memory == 256
+        assert smartphone.color == "Black"
+        assert isinstance(smartphone, Product)
+
+    def test_lawn_grass_creation(self):
+        """Тест создания газонной травы."""
+        grass = LawnGrass(
+            "Газонная трава", "Элитная трава", 500.0, 20,
+            "Россия", "7 дней", "Зеленый"
+        )
+
+        assert grass.name == "Газонная трава"
+        assert grass.price == 500.0
+        assert grass.quantity == 20
+        assert grass.country == "Россия"
+        assert grass.germination_period == "7 дней"
+        assert grass.color == "Зеленый"
+        assert isinstance(grass, Product)
+
+    def test_smartphone_str_representation(self):
+        """Тест строкового представления смартфона."""
+        smartphone = Smartphone(
+            "Samsung", "Смартфон", 80000.0, 5,
+            90.0, "S23", 128, "White"
+        )
+
+        expected = "Samsung, 80000.0 руб. Остаток: 5 шт."
+        assert str(smartphone) == expected
+
+    def test_lawn_grass_str_representation(self):
+        """Тест строкового представления газонной травы."""
+        grass = LawnGrass(
+            "Трава", "Для газона", 300.0, 15,
+            "США", "5 дней", "Темно-зеленый"
+        )
+
+        expected = "Трава, 300.0 руб. Остаток: 15 шт."
+        assert str(grass) == expected
+
+
+class TestProductAdditionInheritance:
+    """Тесты сложения для наследованных классов."""
+
+    def test_smartphone_addition_same_type(self):
+        """Тест сложения смартфонов одного типа."""
+        smartphone1 = Smartphone(
+            "Phone1", "Описание1", 100000.0, 2,
+            95.0, "Model1", 256, "Black"
+        )  # 100000 * 2 = 200000
+
+        smartphone2 = Smartphone(
+            "Phone2", "Описание2", 80000.0, 3,
+            92.0, "Model2", 128, "White"
+        )  # 80000 * 3 = 240000
+
+        total = smartphone1 + smartphone2
+        assert total == 440000.0  # 200000 + 240000
+
+    def test_lawn_grass_addition_same_type(self):
+        """Тест сложения газонных трав одного типа."""
+        grass1 = LawnGrass(
+            "Grass1", "Описание1", 400.0, 5,
+            "Россия", "7 дней", "Зеленый"
+        )  # 400 * 5 = 2000
+
+        grass2 = LawnGrass(
+            "Grass2", "Описание2", 300.0, 4,
+            "США", "5 дней", "Темный"
+        )  # 300 * 4 = 1200
+
+        total = grass1 + grass2
+        assert total == 3200.0  # 2000 + 1200
+
+    def test_smartphone_lawn_grass_addition_error(self):
+        """Тест ошибки при сложении смартфона и газонной травы."""
+        smartphone = Smartphone(
+            "Phone", "Смартфон", 100000.0, 2,
+            95.0, "Model", 256, "Black"
+        )
+
+        grass = LawnGrass(
+            "Grass", "Трава", 400.0, 5,
+            "Россия", "7 дней", "Зеленый"
+        )
+
+        with pytest.raises(TypeError, match="Можно складывать объекты только одного класса"):
+            smartphone + grass
+
+    def test_lawn_grass_smartphone_addition_error(self):
+        """Тест ошибки при сложении газонной травы и смартфона."""
+        grass = LawnGrass(
+            "Grass", "Трава", 400.0, 5,
+            "Россия", "7 дней", "Зеленый"
+        )
+
+        smartphone = Smartphone(
+            "Phone", "Смартфон", 100000.0, 2,
+            95.0, "Model", 256, "Black"
+        )
+
+        with pytest.raises(TypeError, match="Можно складывать объекты только одного класса"):
+            grass + smartphone
+
+
+class TestCategoryWithInheritedProducts:
+    """Тесты категории с наследованными продуктами."""
+
+    def setup_method(self):
+        """Сброс счетчиков перед каждым тестом."""
+        Category.category_count = 0
+        Category.product_count = 0
+
+    def test_add_smartphone_to_category(self):
+        """Тест добавления смартфона в категорию."""
+        category = Category("Смартфоны", "Мобильные устройства")
+        smartphone = Smartphone(
+            "iPhone", "Смартфон", 100000.0, 5,
+            95.0, "15", 256, "Black"
+        )
+
+        category.add_product(smartphone)
+        assert len(category) == 1
+        assert "iPhone, 100000.0 руб. Остаток: 5 шт." in category.get_products
+
+    def test_add_lawn_grass_to_category(self):
+        """Тест добавления газонной травы в категорию."""
+        category = Category("Сад", "Садовые товары")
+        grass = LawnGrass(
+            "Трава", "Газонная", 500.0, 10,
+            "Россия", "7 дней", "Зеленый"
+        )
+
+        category.add_product(grass)
+        assert len(category) == 1
+        assert "Трава, 500.0 руб. Остаток: 10 шт." in category.get_products
+
+    def test_add_mixed_products_to_category(self):
+        """Тест добавления разных типов продуктов в категорию."""
+        category = Category("Разное", "Разные товары")
+
+        smartphone = Smartphone(
+            "Phone", "Смартфон", 80000.0, 3,
+            92.0, "Model", 128, "White"
+        )
+
+        grass = LawnGrass(
+            "Grass", "Трава", 400.0, 8,
+            "США", "5 дней", "Темный"
+        )
+
+        category.add_product(smartphone)
+        category.add_product(grass)
+
+        assert len(category) == 2
+        products_output = category.get_products
+        assert "Phone, 80000.0 руб. Остаток: 3 шт." in products_output
+        assert "Grass, 400.0 руб. Остаток: 8 шт." in products_output
+
+    def test_category_str_with_inherited_products(self):
+        """Тест строкового представления категории с наследованными продуктами."""
+        smartphone = Smartphone(
+            "Phone", "Смартфон", 100000.0, 2,
+            95.0, "Model", 256, "Black"
+        )
+
+        grass = LawnGrass(
+            "Grass", "Трава", 500.0, 3,
+            "Россия", "7 дней", "Зеленый"
+        )
+
+        category = Category("Тест", "Категория", [smartphone, grass])
+
+        expected = "Тест, количество продуктов: 5 шт."  # 2 + 3
+        assert str(category) == expected
+
+
+class TestProductProtection:
+    """Тесты защиты от добавления не-продуктов в категорию."""
+
+    def test_add_only_product_and_inherited(self):
+        """Тест, что в категорию можно добавлять только Product и наследников."""
+        category = Category("Защита", "Тест защиты")
+
+        # Эти должны работать
+        product = Product("Товар", "Описание", 100.0, 5)
+        smartphone = Smartphone("Phone", "Смартфон", 50000.0, 2, 90.0, "M", 128, "B")
+        grass = LawnGrass("Grass", "Трава", 300.0, 4, "RU", "7д", "G")
+
+        category.add_product(product)
+        category.add_product(smartphone)
+        category.add_product(grass)
+
+        assert len(category) == 3
+
+    def test_add_invalid_types_errors(self):
+        """Тест ошибок при добавлении невалидных типов."""
+        category = Category("Защита", "Тест защиты")
+
+        invalid_items = [
+            "строка",
+            123,
+            45.67,
+            ["список"],
+            {"словарь": "значение"},
+            None,
+            True,
+            (1, 2, 3)
+        ]
+
+        for invalid_item in invalid_items:
+            with pytest.raises(TypeError, match="Можно добавлять только объекты класса Product"):
+                category.add_product(invalid_item)
+
+    def test_product_count_with_inherited(self):
+        """Тест счетчика продуктов с наследованными классами."""
+        Category.product_count = 0  # Сброс
+
+        category = Category("Тест", "Категория")
+
+        initial_count = Category.product_count
+
+        product = Product("Товар", "Описание", 100.0, 1)
+        smartphone = Smartphone("Phone", "Смартфон", 50000.0, 1, 90.0, "M", 128, "B")
+        grass = LawnGrass("Grass", "Трава", 300.0, 1, "RU", "7д", "G")
+
+        category.add_product(product)
+        category.add_product(smartphone)
+        category.add_product(grass)
+
+        assert Category.product_count == initial_count + 3
