@@ -1,11 +1,48 @@
-class Product:
+from abc import ABC, abstractmethod
+
+
+class BaseProduct(ABC):
+
+
+    @classmethod
+    @abstractmethod
+    def new_product(cls, product_data):
+        pass
+
+
+    @property
+    @abstractmethod
+    def price(self):
+        pass
+
+
+    @abstractmethod
+    def __str__(self):
+        pass
+
+
+class ReprMixin:
+    """
+    Упрощенный миксин - логирует только факт создания
+    """
+
+    def __init__(self, *args, **kwargs):
+        print(f"Создан объект: {self.__class__.__name__}")
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}()"  # Простой вывод
+
+class Product(ReprMixin, BaseProduct):
     """Класс для представления товара."""
 
-    def __init__(self, name, description, price, quantity):
+    def __init__(self, name, description, price, quantity, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.name = name
         self.description = description
         self.__price = price
         self.quantity = quantity
+
 
     def __str__(self):
         return f"{self.name}, {self.price} руб. Остаток: {self.quantity} шт."

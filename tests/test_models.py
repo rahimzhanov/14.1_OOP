@@ -1,6 +1,6 @@
 import pytest
-from src.models import Product, Category, Smartphone, LawnGrass
-
+from src.models import Product, Category, Smartphone, LawnGrass, BaseProduct, ReprMixin
+from abc import ABC, abstractmethod
 
 class TestProduct:
     """Тесты для класса Product."""
@@ -470,3 +470,110 @@ class TestProductProtection:
         category.add_product(grass)
 
         assert Category.product_count == initial_count + 3
+
+
+class TestReprMixin:
+    """Тесты для миксина ReprMixin."""
+
+    def test_repr_mixin_initialization(self, capsys):
+        """Тест инициализации миксина и вывода в консоль."""
+
+        class TestClass(ReprMixin):
+            def __init__(self, name, value):
+                self.name = name
+                self.value = value
+                super().__init__()  # Без аргументов!
+
+        # Создаем объект и перехватываем вывод
+        obj = TestClass("test_name", 42)
+        captured = capsys.readouterr()
+
+        assert "Создан объект: TestClass" in captured.out
+        assert obj.name == "test_name"
+        assert obj.value == 42
+
+    def test_repr_method(self):
+        """Тест метода __repr__ миксина."""
+
+        class TestClass(ReprMixin):
+            def __init__(self):
+                super().__init__()
+
+        obj = TestClass()
+        repr_str = repr(obj)
+
+        assert repr_str == "TestClass()"
+
+
+class TestProductWithMixin:
+    """Тесты для Product с миксином ReprMixin."""
+
+    def test_product_inherits_from_mixin(self):
+        """Тест, что Product наследует от ReprMixin."""
+        assert issubclass(Product, ReprMixin)
+
+    def test_product_creation_with_mixin(self, capsys):
+        """Тест создания Product с выводом в консоль."""
+        product = Product("Test Product", "Description", 100.0, 5)
+        captured = capsys.readouterr()
+
+        # Проверяем вывод в консоль (упрощенный)
+        assert "Создан объект: Product" in captured.out
+
+        # Проверяем, что объект создался корректно
+        assert product.name == "Test Product"
+        assert product.price == 100.0
+        assert product.quantity == 5
+
+    def test_product_repr_method(self):
+        """Тест метода __repr__ для Product."""
+        product = Product("Test", "Desc", 50.0, 10)
+        repr_str = repr(product)
+
+        # Проверяем упрощенный вывод
+        assert repr_str == "Product()"
+
+    def test_new_product_with_mixin(self, capsys):
+        """Тест фабричного метода с миксином."""
+        product_data = {
+            'name': 'New Product',
+            'description': 'New Description',
+            'price': 200.0,
+            'quantity': 3
+        }
+
+        product = Product.new_product(product_data)
+        captured = capsys.readouterr()
+
+        # Проверяем вывод в консоль (упрощенный)
+        assert "Создан объект: Product" in captured.out
+
+        # Проверяем объект
+        assert product.name == 'New Product'
+        assert product.price == 200.0
+
+
+class TestInheritedClassesWithMixin:
+    """Тесты для наследованных классов с миксином."""
+
+    def test_smartphone_inherits_mixin(self, capsys):
+        """Тест, что Smartphone тоже использует миксин."""
+        smartphone = Smartphone(
+            "Test Phone", "Description", 500.0, 2,
+            95.5, "Model X", 256, "Black"
+        )
+        captured = capsys.readouterr()
+
+        assert "Создан объект: Smartphone" in captured.out
+        assert isinstance(smartphone, Product)
+
+    def test_lawn_grass_inherits_mixin(self, capsys):
+        """Тест, что LawnGrass тоже использует миксин."""
+        grass = LawnGrass(
+            "Test Grass", "Description", 100.0, 5,
+            "Russia", "7 days", "Green"
+        )
+        captured = capsys.readouterr()
+
+        assert "Создан объект: LawnGrass" in captured.out
+        assert isinstance(grass, Product)
