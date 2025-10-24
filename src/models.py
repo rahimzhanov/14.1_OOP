@@ -123,6 +123,16 @@ class Category:
         return len(self.__products)
 
 
+    def middle_price(self):
+        try:
+            summ = 0
+            for product in self.__products:
+                summ +=product.price
+            return summ
+        except:
+            return 0
+
+
 class Smartphone(Product):
     def __init__(self,  name, description, price, quantity, efficiency, model, memory, color):
         super().__init__(name, description, price, quantity)
