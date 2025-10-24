@@ -128,7 +128,7 @@ class Category:
             summ = 0
             for product in self.__products:
                 summ +=product.price
-            return summ
+            return summ / len(self.__products)
         except:
             return 0
 

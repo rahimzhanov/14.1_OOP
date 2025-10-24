@@ -179,6 +179,18 @@ class TestCategory:
         expected = "Электроника, количество продуктов: 8 шт."  # 5 + 3
         assert str(category) == expected
 
+    def test_middle_price_calculation(self):
+        """Тест расчета средней цены товаров"""
+        product1 = Product("Телефон", "Смартфон", 1000.0, 5)
+        product2 = Product("Ноутбук", "Игровой", 2000.0, 3)
+        category = Category("Электроника", "Техника", [product1, product2])
+        assert category.middle_price() == 1500
+
+    def test_middle_price_empty_list(self):
+        """Тест с пустым списком товаров"""
+        category = Category("Электроника", "Техника", [])
+        assert category.middle_price() == 0
+
 
 def test_category_products_getter():
     """Тест геттера products в классе Category."""
